@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>সম্পূর্ণ ERP অ্যাডমিন প্যানেল</title>
+    <title>Complete ERP Admin Panel</title>
     <style>
         :root {
             --primary-color: #4a69bd; --secondary-color: #1e3799; --background-color: #f5f7fa;
@@ -58,84 +58,84 @@
 
     <div id="login-page">
         <div class="card" style="width: 400px;">
-            <h2>অ্যাডমিন লগইন</h2>
+            <h2>Admin Login</h2>
             <div id="login-error" style="color: var(--danger-color); margin-bottom: 10px;"></div>
             <form onsubmit="loginUser(event)">
-                <div class="form-group"><label for="login-email">ইমেইল</label><input type="email" id="login-email" required></div>
-                <div class="form-group"><label for="login-password">পাসওয়ার্ড</label><input type="password" id="login-password" required></div>
-                <button type="submit" class="btn">লগইন</button>
+                <div class="form-group"><label for="login-email">Email</label><input type="email" id="login-email" required></div>
+                <div class="form-group"><label for="login-password">Password</label><input type="password" id="login-password" required></div>
+                <button type="submit" class="btn">Login</button>
             </form>
         </div>
     </div>
 
     <div id="admin-panel" class="admin-container" style="display: none;">
         <nav class="sidebar">
-            <div class="sidebar-header">ERP সিস্টেম</div>
+            <div class="sidebar-header">ERP System</div>
             <ul class="sidebar-menu">
-                <li><a href="#" class="active" onclick="showPage('dashboard', this)">ড্যাশবোর্ড</a></li>
-                <li><a href="#" onclick="showPage('bom-update', this)">বিওএম আপডেট</a></li>
-                <li><a href="#" onclick="showPage('user-management', this)">ব্যবহারকারী ব্যবস্থাপনা</a></li>
-                <li><a href="#" onclick="showPage('master-report', this)">মাস্টার রিপোর্ট</a></li>
-                <li><a href="#" onclick="logoutUser()">লগআউট</a></li>
+                <li><a href="#" class="active" onclick="showPage('dashboard', this)">Dashboard</a></li>
+                <li><a href="#" onclick="showPage('bom-update', this)">BOM Update</a></li>
+                <li><a href="#" onclick="showPage('user-management', this)">User Management</a></li>
+                <li><a href="#" onclick="showPage('master-report', this)">Master Report</a></li>
+                <li><a href="#" onclick="logoutUser()">Logout</a></li>
             </ul>
         </nav>
         <main class="main-content">
             <div id="dashboard" class="page-content">
-                <div class="header"><h1>ড্যাশবোর্ড</h1></div>
+                <div class="header"><h1>Dashboard</h1></div>
                 <div class="stat-cards">
-                    <div class="stat-card"><h3>মোট মডেল</h3><p id="total-models">0</p></div>
-                    <div class="stat-card"><h3>মোট ব্যবহারকারী</h3><p id="total-users">0</p></div>
-                    <div class="stat-card"><h3>মোট প্রোডাকশন</h3><p id="total-production">0</p></div>
-                    <div class="stat-card"><h3>মোট ফেইল</h3><p id="total-fail">0</p></div>
+                    <div class="stat-card"><h3>Total Models</h3><p id="total-models">0</p></div>
+                    <div class="stat-card"><h3>Total Users</h3><p id="total-users">0</p></div>
+                    <div class="stat-card"><h3>Total Production</h3><p id="total-production">0</p></div>
+                    <div class="stat-card"><h3>Total Failures</h3><p id="total-fail">0</p></div>
                 </div>
             </div>
             <div id="bom-update" class="page-content">
-                <div class="header"><h1>বিওএম (Bill of Materials) আপডেট</h1></div>
+                <div class="header"><h1>BOM (Bill of Materials) Update</h1></div>
                 <div class="card">
                     <form id="bom-form" onsubmit="saveBOM(event)">
                         <div class="form-grid">
-                            <div class="form-group"><label for="model-name">মডেলের নাম</label><input type="text" id="model-name" required></div>
-                            <div class="form-group"><label for="batch-no">ব্যাচ নম্বর</label><input type="text" id="batch-no" required></div>
-                            <div class="form-group"><label for="material-name">মেটেরিয়ালের নাম</label><input type="text" id="material-name" required></div>
-                            <div class="form-group"><label for="color">রঙ</label><input type="text" id="color" required></div>
-                            <div class="form-group"><label for="import-qty">আমদানিকৃত পরিমাণ</label><input type="number" id="import-qty" min="0" required></div>
-                            <div class="form-group"><label for="target-qty">টার্গেট পরিমাণ</label><input type="number" id="target-qty" min="1" required></div>
+                            <div class="form-group"><label for="model-name">Model Name</label><input type="text" id="model-name" required></div>
+                            <div class="form-group"><label for="batch-no">Batch Number</label><input type="text" id="batch-no" required></div>
+                            <div class="form-group"><label for="material-name">Material Name</label><input type="text" id="material-name" required></div>
+                            <div class="form-group"><label for="color">Color</label><input type="text" id="color" required></div>
+                            <div class="form-group"><label for="import-qty">Imported Quantity</label><input type="number" id="import-qty" min="0" required></div>
+                            <div class="form-group"><label for="target-qty">Target Quantity</label><input type="number" id="target-qty" min="1" required></div>
                         </div>
-                        <button type="submit" class="btn">BOM সেভ করুন</button>
+                        <button type="submit" class="btn">Save BOM</button>
                     </form>
                 </div>
             </div>
             <div id="user-management" class="page-content">
-                <div class="header"><h1>ব্যবহারকারী ব্যবস্থাপনা</h1></div>
+                <div class="header"><h1>User Management</h1></div>
                 <div class="card">
-                    <button id="addUserBtn" class="btn" style="margin-bottom: 20px;">নতুন ব্যবহারকারী যোগ করুন</button>
+                    <button id="addUserBtn" class="btn" style="margin-bottom: 20px;">Add New User</button>
                     <table class="styled-table">
-                        <thead><tr><th>ইমেইল</th><th>ভূমিকা (Role)</th><th>অ্যাকশন</th></tr></thead>
+                        <thead><tr><th>Email</th><th>Role</th><th>Action</th></tr></thead>
                         <tbody id="user-table-body"></tbody>
                     </table>
                 </div>
             </div>
             <div id="master-report" class="page-content">
-                <div class="header"><h1>মাস্টার রিপোর্ট</h1></div>
+                <div class="header"><h1>Master Report</h1></div>
                 <div class="card">
                     <div class="filter-container">
-                        <input type="text" id="filter-model" placeholder="মডেল দিয়ে খুঁজুন...">
-                        <input type="text" id="filter-batch" placeholder="ব্যাচ নম্বর দিয়ে খুঁজুন...">
-                        <button class="btn" onclick="fetchMasterReport()">ফিল্টার করুন</button>
-                        <button class="btn secondary" onclick="resetMasterReportFilter()">রিসেট</button>
+                        <input type="text" id="filter-model" placeholder="Search by model...">
+                        <input type="text" id="filter-batch" placeholder="Search by batch number...">
+                        <button class="btn" onclick="fetchMasterReport()">Filter</button>
+                        <button class="btn secondary" onclick="resetMasterReportFilter()">Reset</button>
                     </div>
                     <table class="styled-table">
                         <thead>
                             <tr>
-                                <th>মডেলের নাম</th>
-                                <th>ব্যাচ নং</th>
-                                <th>রঙ</th>
-                                <th>টার্গেট</th>
-                                <th>ইন-হ্যান্ড</th>
-                                <th>প্যাকিংয়ে পাঠানো</th>
-                                <th>মোট ফেইল</th>
-                                <th>বাকি</th>
-                                <th>অ্যাকশন</th>
+                                <th>Model Name</th>
+                                <th>Batch No.</th>
+                                <th>Color</th>
+                                <th>Target</th>
+                                <th>In-Hand</th>
+                                <th>Sent to Packing</th>
+                                <th>Total Fail</th>
+                                <th>Remaining</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="report-table-body"></tbody>
@@ -148,13 +148,13 @@
     <div id="addUserModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h2>নতুন ব্যবহারকারী তৈরি করুন</h2>
+            <h2>Create New User</h2>
             <div id="modal-error" style="color: var(--danger-color); margin-bottom: 10px;"></div>
             <form id="addUserForm" onsubmit="createNewUser(event)">
-                <div class="form-group"><label for="user-email">ইমেইল</label><input type="email" id="user-email" required></div>
-                <div class="form-group"><label for="user-password">পাসওয়ার্ড</label><input type="password" id="user-password" required></div>
-                <div class="form-group"><label for="user-role">ভূমিকা (Role)</label><select id="user-role" required><option value="user">User</option><option value="admin">Admin</option></select></div>
-                <button type="submit" class="btn">তৈরি করুন</button>
+                <div class="form-group"><label for="user-email">Email</label><input type="email" id="user-email" required></div>
+                <div class="form-group"><label for="user-password">Password</label><input type="password" id="user-password" required></div>
+                <div class="form-group"><label for="user-role">Role</label><select id="user-role" required><option value="user">User</option><option value="admin">Admin</option></select></div>
+                <button type="submit" class="btn">Create</button>
             </form>
         </div>
     </div>
@@ -165,7 +165,7 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCaVR0gMKOMCMUQHPcchZVzP8Z2xeXmqR4", // অনুগ্রহ করে এই কী পরিবর্তন করুন
+            apiKey: "AIzaSyCaVR0gMKOMCMUQHPcchZVzP8Z2xeXmqR4", // Please change this key
             authDomain: "erp-acb6b.firebaseapp.com",
             databaseURL: "https://erp-acb6b-default-rtdb.firebaseio.com",
             projectId: "erp-acb6b",
@@ -188,8 +188,6 @@
             document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
             element.classList.add('active');
             
-            // এই ফাংশনটি এখন শুধুমাত্র পেজ পরিবর্তন করবে
-            // ডেটা লোড করার কাজ checkUserRoleAndShowPanel এবং মেন্যু ক্লিকের মাধ্যমে হবে
             if (pageId === 'master-report') fetchAllMaterialsAndRenderReport();
         }
 
@@ -210,19 +208,17 @@
                     document.getElementById('admin-panel').style.display = 'flex';
                     
                     initializeModalListeners();
-                    
-                    // *** সমাধান: লগইন করার সাথে সাথেই ড্যাশবোর্ড এবং ইউজার তালিকা লোড করা হচ্ছে ***
                     loadDashboardData();
                     fetchUsers();
                     
                     showPage('dashboard', document.querySelector('.sidebar-menu a'));
                 } else {
-                    alert("আপনার এই প্যানেল অ্যাক্সেস করার অনুমতি নেই।");
+                    alert("You do not have permission to access this panel.");
                     logoutUser();
                 }
             } catch (error) {
-                console.error(" ভূমিকা যাচাই করতে বা ডেটা লোড করতে সমস্যা:", error);
-                alert("আপনার Firestore Rules চেক করুন। ডেটা পড়ার অনুমতি নেই।");
+                console.error("Error verifying role or loading data:", error);
+                alert("Please check your Firestore Rules. You may not have permission to read user data.");
                 logoutUser();
             }
         }
@@ -232,7 +228,7 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             auth.signInWithEmailAndPassword(email, password)
-                .catch(e => { document.getElementById('login-error').textContent = 'ভুল ইমেইল বা পাসওয়ার্ড।'; });
+                .catch(e => { document.getElementById('login-error').textContent = 'Incorrect email or password.'; });
         }
 
         function logoutUser() { auth.signOut(); }
@@ -249,10 +245,10 @@
                 const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, password);
                 await db.collection('users').doc(userCredential.user.uid).set({ email, role });
                 await secondaryApp.auth().signOut();
-                alert('ব্যবহারকারী সফলভাবে তৈরি হয়েছে!');
+                alert('User created successfully!');
                 document.getElementById('addUserModal').style.display = "none";
-                fetchUsers(); // নতুন ইউজার তৈরির পর তালিকা রিফ্রেশ করা হচ্ছে
-                loadDashboardData(); // ইউজার সংখ্যা আপডেটের জন্য ড্যাশবোর্ড রিফ্রেশ
+                fetchUsers(); 
+                loadDashboardData();
             } catch (error) {
                 errorDiv.textContent = error.message;
                 await secondaryApp.auth().signOut();
@@ -265,22 +261,22 @@
                 const userTableBody = document.getElementById('user-table-body');
                 userTableBody.innerHTML = '';
                 if(snapshot.empty){
-                    userTableBody.innerHTML = '<tr><td colspan="3">কোনো ব্যবহারকারী পাওয়া যায়নি।</td></tr>';
+                    userTableBody.innerHTML = '<tr><td colspan="3">No users found.</td></tr>';
                     return;
                 }
                 snapshot.forEach(doc => {
                     const user = doc.data();
-                    userTableBody.innerHTML += `<tr><td>${user.email}</td><td>${user.role}</td><td><a href="#" style="color:red;" onclick="deleteUser('${doc.id}', '${user.email}')">মুছুন</a></td></tr>`;
+                    userTableBody.innerHTML += `<tr><td>${user.email}</td><td>${user.role}</td><td><a href="#" style="color:red;" onclick="deleteUser('${doc.id}', '${user.email}')">Delete</a></td></tr>`;
                 });
             } catch(error){
-                console.error("ব্যবহারকারীদের তালিকা আনতে সমস্যা:", error);
+                console.error("Error fetching users:", error);
             }
         }
 
         function deleteUser(docId, email) {
-            if (confirm(`আপনি কি "${email}" ইমেইলের ব্যবহারকারীকে মুছে ফেলতে চান?`)) {
+            if (confirm(`Are you sure you want to delete the user with email "${email}"?`)) {
                 db.collection('users').doc(docId).delete().then(() => {
-                    alert("ব্যবহারকারী সফলভাবে মুছে ফেলা হয়েছে।");
+                    alert("User deleted successfully.");
                     fetchUsers();
                     loadDashboardData();
                 });
@@ -304,22 +300,22 @@
             };
             try {
                 await db.collection('materials').add(bomData);
-                alert('BOM সফলভাবে সেভ হয়েছে!');
+                alert('BOM saved successfully!');
                 document.getElementById('bom-form').reset();
             } catch (error) {
-                alert('একটি সমস্যা হয়েছে: ' + error.message);
+                alert('An error occurred: ' + error.message);
             }
         }
         
         async function fetchAllMaterialsAndRenderReport() {
             try {
                 const reportTableBody = document.getElementById('report-table-body');
-                reportTableBody.innerHTML = `<tr><td colspan="9">লোড হচ্ছে...</td></tr>`;
+                reportTableBody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
                 const snapshot = await db.collection('materials').orderBy('createdAt', 'desc').get();
                 allMaterialsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderMasterReport(allMaterialsData);
             } catch (error) {
-                console.error("মাস্টার রিপোর্ট লোড করতে সমস্যা:", error);
+                console.error("Error loading master report:", error);
             }
         }
 
@@ -338,7 +334,7 @@
             const reportTableBody = document.getElementById('report-table-body');
             let tableHtml = '';
             if (data.length === 0) {
-                 reportTableBody.innerHTML = `<tr><td colspan="9">কোনো ডেটা পাওয়া যায়নি।</td></tr>`;
+                 reportTableBody.innerHTML = `<tr><td colspan="9">No data found.</td></tr>`;
                  return;
             }
             data.forEach(item => {
@@ -359,7 +355,7 @@
                         <td>${totalFail}</td>
                         <td>${remaining > 0 ? remaining : 0}</td>
                         <td>
-                            <button class="btn btn-danger" onclick="deleteMaterialEntry('${item.id}', '${item.modelName} - ${item.batchNo}')">মুছুন</button>
+                            <button class="btn btn-danger" onclick="deleteMaterialEntry('${item.id}', '${item.modelName} - ${item.batchNo}')">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -368,14 +364,14 @@
         }
         
         function deleteMaterialEntry(docId, modelInfo) {
-            if (confirm(`আপনি কি "${modelInfo}" মডেলটি স্থায়ীভাবে মুছে ফেলতে চান?`)) {
+            if (confirm(`Are you sure you want to permanently delete the entry for "${modelInfo}"?`)) {
                 db.collection('materials').doc(docId).delete()
                     .then(() => {
-                        alert('এন্ট্রি সফলভাবে মুছে ফেলা হয়েছে!');
+                        alert('Entry deleted successfully!');
                         fetchAllMaterialsAndRenderReport();
                     })
                     .catch((error) => {
-                        alert('এন্ট্রি মুছতে একটি সমস্যা হয়েছে: ' + error);
+                        alert('An error occurred while deleting the entry: ' + error);
                     });
             }
         }
@@ -405,7 +401,7 @@
                 document.getElementById('total-production').textContent = totalProduction;
                 document.getElementById('total-fail').textContent = totalFail;
             } catch (error) {
-                console.error("ড্যাশবোর্ডের ডেটা লোড করতে সমস্যা:", error);
+                console.error("Error loading dashboard data:", error);
             }
         }
         
