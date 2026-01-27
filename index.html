@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সম্পূর্ণ ERP অ্যাডমিন প্যানেল</title>
+    <style>
+        :root {
+            --primary-color: #4a69bd; --secondary-color: #1e3799; --background-color: #f5f7fa;
+            --sidebar-bg: #2c3e50; --sidebar-text: #ecf0f1; --sidebar-hover: #34495e;
+            --text-color: #333; --card-bg: #ffffff; --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --danger-color: #e74c3c; --danger-hover: #c0392b;
+        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: var(--background-color); color: var(--text-color); }
+        .admin-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid var(--sidebar-hover); }
+        .sidebar-menu { list-style: none; padding: 20px 0; margin: 0; flex-grow: 1; }
+        .sidebar-menu li a { display: flex; align-items: center; color: var(--sidebar-text); text-decoration: none; padding: 15px 20px; transition: background-color 0.3s; border-left: 4px solid transparent; }
+        .sidebar-menu li a:hover { background-color: var(--sidebar-hover); }
+        .sidebar-menu li a.active { background-color: var(--primary-color); border-left: 4px solid var(--sidebar-text); font-weight: bold; }
+        .main-content { flex-grow: 1; padding: 25px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header h1 { margin: 0; font-size: 2rem; color: var(--secondary-color); }
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background-color: var(--card-bg); padding: 25px; border-radius: 8px; box-shadow: var(--shadow); margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn { background-color: var(--primary-color); color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background-color 0.2s; }
+        .btn:hover { background-color: var(--secondary-color); }
+        .btn.secondary { background: #7f8c8d; }
+        .btn.secondary:hover { background: #95a5a6; }
+        .btn-danger { background-color: var(--danger-color); padding: 6px 12px; font-size: 0.9rem; }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .styled-table { width: 100%; border-collapse: collapse; }
+        .styled-table thead tr { background-color: var(--primary-color); color: #ffffff; text-align: left; }
+        .styled-table th, .styled-table td { padding: 12px 15px; }
+        .styled-table tbody tr { border-bottom: 1px solid #dddddd; }
+        .styled-table tbody tr:hover { background-color: #f5f5f5; }
+        .filter-container { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-container input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 25px; border-radius: 8px; width: 80%; max-width: 500px; animation: modalopen 0.4s; }
+        @keyframes modalopen { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .stat-card { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-card h3 { margin: 0 0 10px 0; font-size: 1.2rem; }
+        .stat-card p { margin: 0; font-size: 2.5rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="login-page">
+        <div class="card" style="width: 400px;">
+            <h2>অ্যাডমিন লগইন</h2>
+            <div id="login-error" style="color: var(--danger-color); margin-bottom: 10px;"></div>
+            <form onsubmit="loginUser(event)">
+                <div class="form-group"><label for="login-email">ইমেইল</label><input type="email" id="login-email" required></div>
+                <div class="form-group"><label for="login-password">পাসওয়ার্ড</label><input type="password" id="login-password" required></div>
+                <button type="submit" class="btn">লগইন</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="admin-container" style="display: none;">
+        <nav class="sidebar">
+            <div class="sidebar-header">ERP সিস্টেম</div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" onclick="showPage('dashboard', this)">ড্যাশবোর্ড</a></li>
+                <li><a href="#" onclick="showPage('bom-update', this)">বিওএম আপডেট</a></li>
+                <li><a href="#" onclick="showPage('user-management', this)">ব্যবহারকারী ব্যবস্থাপনা</a></li>
+                <li><a href="#" onclick="showPage('master-report', this)">মাস্টার রিপোর্ট</a></li>
+                <li><a href="#" onclick="logoutUser()">লগআউট</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <div id="dashboard" class="page-content">
+                <div class="header"><h1>ড্যাশবোর্ড</h1></div>
+                <div class="stat-cards">
+                    <div class="stat-card"><h3>মোট মডেল</h3><p id="total-models">0</p></div>
+                    <div class="stat-card"><h3>মোট ব্যবহারকারী</h3><p id="total-users">0</p></div>
+                    <div class="stat-card"><h3>মোট প্রোডাকশন</h3><p id="total-production">0</p></div>
+                    <div class="stat-card"><h3>মোট ফেইল</h3><p id="total-fail">0</p></div>
+                </div>
+            </div>
+            <div id="bom-update" class="page-content">
+                <div class="header"><h1>বিওএম (Bill of Materials) আপডেট</h1></div>
+                <div class="card">
+                    <form id="bom-form" onsubmit="saveBOM(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label for="model-name">মডেলের নাম</label><input type="text" id="model-name" required></div>
+                            <div class="form-group"><label for="batch-no">ব্যাচ নম্বর</label><input type="text" id="batch-no" required></div>
+                            <div class="form-group"><label for="material-name">মেটেরিয়ালের নাম</label><input type="text" id="material-name" required></div>
+                            <div class="form-group"><label for="color">রঙ</label><input type="text" id="color" required></div>
+                            <div class="form-group"><label for="import-qty">আমদানিকৃত পরিমাণ</label><input type="number" id="import-qty" min="0" required></div>
+                            <div class="form-group"><label for="target-qty">টার্গেট পরিমাণ</label><input type="number" id="target-qty" min="1" required></div>
+                        </div>
+                        <button type="submit" class="btn">BOM সেভ করুন</button>
+                    </form>
+                </div>
+            </div>
+            <div id="user-management" class="page-content">
+                <div class="header"><h1>ব্যবহারকারী ব্যবস্থাপনা</h1></div>
+                <div class="card">
+                    <button id="addUserBtn" class="btn" style="margin-bottom: 20px;">নতুন ব্যবহারকারী যোগ করুন</button>
+                    <table class="styled-table">
+                        <thead><tr><th>ইমেইল</th><th>ভূমিকা (Role)</th><th>অ্যাকশন</th></tr></thead>
+                        <tbody id="user-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="master-report" class="page-content">
+                <div class="header"><h1>মাস্টার রিপোর্ট</h1></div>
+                <div class="card">
+                    <div class="filter-container">
+                        <input type="text" id="filter-model" placeholder="মডেল দিয়ে খুঁজুন...">
+                        <input type="text" id="filter-batch" placeholder="ব্যাচ নম্বর দিয়ে খুঁজুন...">
+                        <button class="btn" onclick="fetchMasterReport()">ফিল্টার করুন</button>
+                        <button class="btn secondary" onclick="resetMasterReportFilter()">রিসেট</button>
+                    </div>
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>মডেলের নাম</th>
+                                <th>ব্যাচ নং</th>
+                                <th>রঙ</th>
+                                <th>টার্গেট</th>
+                                <th>ইন-হ্যান্ড</th>
+                                <th>প্যাকিংয়ে পাঠানো</th>
+                                <th>মোট ফেইল</th>
+                                <th>বাকি</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>নতুন ব্যবহারকারী তৈরি করুন</h2>
+            <div id="modal-error" style="color: var(--danger-color); margin-bottom: 10px;"></div>
+            <form id="addUserForm" onsubmit="createNewUser(event)">
+                <div class="form-group"><label for="user-email">ইমেইল</label><input type="email" id="user-email" required></div>
+                <div class="form-group"><label for="user-password">পাসওয়ার্ড</label><input type="password" id="user-password" required></div>
+                <div class="form-group"><label for="user-role">ভূমিকা (Role)</label><select id="user-role" required><option value="user">User</option><option value="admin">Admin</option></select></div>
+                <button type="submit" class="btn">তৈরি করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaVR0gMKOMCMUQHPcchZVzP8Z2xeXmqR4", // অনুগ্রহ করে এই কী পরিবর্তন করুন
+            authDomain: "erp-acb6b.firebaseapp.com",
+            databaseURL: "https://erp-acb6b-default-rtdb.firebaseio.com",
+            projectId: "erp-acb6b",
+            storageBucket: "erp-acb6b.appspot.com",
+            messagingSenderId: "224077695495",
+            appId: "1:224077695495:web:dce4ed9fed907e8e5fb8a2",
+            measurementId: "G-BQ8R96S97S"
+        };
+        
+        const mainApp = firebase.initializeApp(firebaseConfig);
+        const auth = mainApp.auth();
+        const db = mainApp.firestore();
+        const secondaryApp = firebase.initializeApp(firebaseConfig, 'userCreationApp');
+        
+        let allMaterialsData = [];
+
+        function showPage(pageId, element) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            element.classList.add('active');
+            
+            // এই ফাংশনটি এখন শুধুমাত্র পেজ পরিবর্তন করবে
+            // ডেটা লোড করার কাজ checkUserRoleAndShowPanel এবং মেন্যু ক্লিকের মাধ্যমে হবে
+            if (pageId === 'master-report') fetchAllMaterialsAndRenderReport();
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                checkUserRoleAndShowPanel(user.uid);
+            } else {
+                document.getElementById('login-page').style.display = 'flex';
+                document.getElementById('admin-panel').style.display = 'none';
+            }
+        });
+
+        async function checkUserRoleAndShowPanel(uid) {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                if (userDoc.exists && userDoc.data().role === 'admin') {
+                    document.getElementById('login-page').style.display = 'none';
+                    document.getElementById('admin-panel').style.display = 'flex';
+                    
+                    initializeModalListeners();
+                    
+                    // *** সমাধান: লগইন করার সাথে সাথেই ড্যাশবোর্ড এবং ইউজার তালিকা লোড করা হচ্ছে ***
+                    loadDashboardData();
+                    fetchUsers();
+                    
+                    showPage('dashboard', document.querySelector('.sidebar-menu a'));
+                } else {
+                    alert("আপনার এই প্যানেল অ্যাক্সেস করার অনুমতি নেই।");
+                    logoutUser();
+                }
+            } catch (error) {
+                console.error(" ভূমিকা যাচাই করতে বা ডেটা লোড করতে সমস্যা:", error);
+                alert("আপনার Firestore Rules চেক করুন। ডেটা পড়ার অনুমতি নেই।");
+                logoutUser();
+            }
+        }
+
+        function loginUser(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(e => { document.getElementById('login-error').textContent = 'ভুল ইমেইল বা পাসওয়ার্ড।'; });
+        }
+
+        function logoutUser() { auth.signOut(); }
+        
+        async function createNewUser(event) {
+            event.preventDefault();
+            const email = document.getElementById('user-email').value;
+            const password = document.getElementById('user-password').value;
+            const role = document.getElementById('user-role').value;
+            const errorDiv = document.getElementById('modal-error');
+            errorDiv.textContent = '';
+            
+            try {
+                const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, password);
+                await db.collection('users').doc(userCredential.user.uid).set({ email, role });
+                await secondaryApp.auth().signOut();
+                alert('ব্যবহারকারী সফলভাবে তৈরি হয়েছে!');
+                document.getElementById('addUserModal').style.display = "none";
+                fetchUsers(); // নতুন ইউজার তৈরির পর তালিকা রিফ্রেশ করা হচ্ছে
+                loadDashboardData(); // ইউজার সংখ্যা আপডেটের জন্য ড্যাশবোর্ড রিফ্রেশ
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                await secondaryApp.auth().signOut();
+            }
+        }
+
+        async function fetchUsers() {
+            try {
+                const snapshot = await db.collection('users').get();
+                const userTableBody = document.getElementById('user-table-body');
+                userTableBody.innerHTML = '';
+                if(snapshot.empty){
+                    userTableBody.innerHTML = '<tr><td colspan="3">কোনো ব্যবহারকারী পাওয়া যায়নি।</td></tr>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    userTableBody.innerHTML += `<tr><td>${user.email}</td><td>${user.role}</td><td><a href="#" style="color:red;" onclick="deleteUser('${doc.id}', '${user.email}')">মুছুন</a></td></tr>`;
+                });
+            } catch(error){
+                console.error("ব্যবহারকারীদের তালিকা আনতে সমস্যা:", error);
+            }
+        }
+
+        function deleteUser(docId, email) {
+            if (confirm(`আপনি কি "${email}" ইমেইলের ব্যবহারকারীকে মুছে ফেলতে চান?`)) {
+                db.collection('users').doc(docId).delete().then(() => {
+                    alert("ব্যবহারকারী সফলভাবে মুছে ফেলা হয়েছে।");
+                    fetchUsers();
+                    loadDashboardData();
+                });
+            }
+        }
+        
+        async function saveBOM(event) {
+            event.preventDefault();
+            const bomData = {
+                modelName: document.getElementById('model-name').value,
+                batchNo: document.getElementById('batch-no').value,
+                materialName: document.getElementById('material-name').value,
+                color: document.getElementById('color').value,
+                importQty: Number(document.getElementById('import-qty').value),
+                targetQty: Number(document.getElementById('target-qty').value),
+                inHandQty: 0,
+                packingSentQty: 0,
+                faultyQty: 0,
+                failQty: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            try {
+                await db.collection('materials').add(bomData);
+                alert('BOM সফলভাবে সেভ হয়েছে!');
+                document.getElementById('bom-form').reset();
+            } catch (error) {
+                alert('একটি সমস্যা হয়েছে: ' + error.message);
+            }
+        }
+        
+        async function fetchAllMaterialsAndRenderReport() {
+            try {
+                const reportTableBody = document.getElementById('report-table-body');
+                reportTableBody.innerHTML = `<tr><td colspan="9">লোড হচ্ছে...</td></tr>`;
+                const snapshot = await db.collection('materials').orderBy('createdAt', 'desc').get();
+                allMaterialsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMasterReport(allMaterialsData);
+            } catch (error) {
+                console.error("মাস্টার রিপোর্ট লোড করতে সমস্যা:", error);
+            }
+        }
+
+        function fetchMasterReport() {
+            const modelFilter = document.getElementById('filter-model').value.toLowerCase();
+            const batchFilter = document.getElementById('filter-batch').value.toLowerCase();
+            const filteredData = allMaterialsData.filter(item => {
+                const modelMatch = modelFilter ? (item.modelName || '').toLowerCase().includes(modelFilter) : true;
+                const batchMatch = batchFilter ? (item.batchNo || '').toLowerCase().includes(batchFilter) : true;
+                return modelMatch && batchMatch;
+            });
+            renderMasterReport(filteredData);
+        }
+
+        function renderMasterReport(data) {
+            const reportTableBody = document.getElementById('report-table-body');
+            let tableHtml = '';
+            if (data.length === 0) {
+                 reportTableBody.innerHTML = `<tr><td colspan="9">কোনো ডেটা পাওয়া যায়নি।</td></tr>`;
+                 return;
+            }
+            data.forEach(item => {
+                const target = item.targetQty || 0;
+                const inHand = item.inHandQty || 0;
+                const packingSent = item.packingSentQty || 0;
+                const totalFail = (item.faultyQty || 0) + (item.failQty || 0);
+                const achievement = inHand + packingSent;
+                const remaining = target - achievement;
+                tableHtml += `
+                    <tr>
+                        <td>${item.modelName}</td>
+                        <td>${item.batchNo || 'N/A'}</td>
+                        <td>${item.color}</td>
+                        <td>${target}</td>
+                        <td>${inHand}</td>
+                        <td>${packingSent}</td>
+                        <td>${totalFail}</td>
+                        <td>${remaining > 0 ? remaining : 0}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteMaterialEntry('${item.id}', '${item.modelName} - ${item.batchNo}')">মুছুন</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            reportTableBody.innerHTML = tableHtml;
+        }
+        
+        function deleteMaterialEntry(docId, modelInfo) {
+            if (confirm(`আপনি কি "${modelInfo}" মডেলটি স্থায়ীভাবে মুছে ফেলতে চান?`)) {
+                db.collection('materials').doc(docId).delete()
+                    .then(() => {
+                        alert('এন্ট্রি সফলভাবে মুছে ফেলা হয়েছে!');
+                        fetchAllMaterialsAndRenderReport();
+                    })
+                    .catch((error) => {
+                        alert('এন্ট্রি মুছতে একটি সমস্যা হয়েছে: ' + error);
+                    });
+            }
+        }
+
+        function resetMasterReportFilter() {
+            document.getElementById('filter-model').value = '';
+            document.getElementById('filter-batch').value = '';
+            renderMasterReport(allMaterialsData);
+        }
+        
+        async function loadDashboardData() {
+            try {
+                const usersPromise = db.collection('users').get();
+                const materialsPromise = db.collection('materials').get();
+                
+                const [usersSnapshot, materialsSnapshot] = await Promise.all([usersPromise, materialsPromise]);
+                
+                let totalProduction = 0, totalFail = 0;
+                materialsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    totalProduction += (data.inHandQty || 0) + (data.packingSentQty || 0);
+                    totalFail += (data.faultyQty || 0) + (data.failQty || 0);
+                });
+                
+                document.getElementById('total-users').textContent = usersSnapshot.size;
+                document.getElementById('total-models').textContent = materialsSnapshot.size;
+                document.getElementById('total-production').textContent = totalProduction;
+                document.getElementById('total-fail').textContent = totalFail;
+            } catch (error) {
+                console.error("ড্যাশবোর্ডের ডেটা লোড করতে সমস্যা:", error);
+            }
+        }
+        
+        function initializeModalListeners() {
+            const modal = document.getElementById("addUserModal");
+            const btn = document.getElementById("addUserBtn");
+            const span = document.getElementsByClassName("close-button")[0];
+            
+            if(btn) {
+                btn.onclick = () => {
+                    modal.style.display = "block";
+                    document.getElementById('addUserForm').reset();
+                    document.getElementById('modal-error').textContent = '';
+                };
+            }
+            if(span) {
+                span.onclick = () => { modal.style.display = "none"; };
+            }
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        }
+    </script>
+</body>
+</html>
