@@ -16,7 +16,7 @@
         .sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; }
         .sidebar-header { padding: 20px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid var(--sidebar-hover); }
         .sidebar-menu { list-style: none; padding: 20px 0; margin: 0; flex-grow: 1; }
-        .sidebar-menu li a { display: flex; align-items: center; color: var(--sidebar-text); text-decoration: none; padding: 15px 20px; transition: background-color 0.3s; border-left: 4px solid transparent; }
+        .sidebar-menu li a { display: flex; align-items: center; color: var(--sidebar-text); text-decoration: none; padding: 15px 20px; transition: background-color: 0.3s; border-left: 4px solid transparent; }
         .sidebar-menu li a:hover { background-color: var(--sidebar-hover); }
         .sidebar-menu li a.active { background-color: var(--primary-color); border-left: 4px solid var(--sidebar-text); font-weight: bold; }
         .main-content { flex-grow: 1; padding: 25px; }
@@ -42,7 +42,7 @@
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border-radius: 8px; width: 80%; max-width: 700px; animation: modalopen 0.4s; }
         @keyframes modalopen { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
         .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .permission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .permission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .permission-item { display: flex; align-items: center; margin-bottom: 8px; }
         .permission-item input { width: auto; margin-right: 10px; }
         .permission-item label { margin-bottom: 0; }
@@ -75,6 +75,7 @@
                 <li><a href="#" onclick="showPage('user-management', this)">User Management</a></li>
                 <li><a href="#" onclick="showPage('master-report', this)">Master Report</a></li>
                 <li><a href="#" onclick="showPage('packing-send-report', this)">Packing Send Report</a></li>
+                <li><a href="#" onclick="showPage('production-log', this)">Production Log</a></li>
                 <li><a href="#" onclick="logoutUser()">Logout</a></li>
             </ul>
         </nav>
@@ -118,7 +119,7 @@
                  <div class="header"><h1>Master Report</h1></div>
                 <div class="card">
                     <table class="styled-table">
-                        <thead><tr><th>Model Name</th><th>Batch No.</th><th>Color</th><th>Target</th><th>In-Hand</th><th>Sent to Packing</th><th>Total Fail</th><th>Remaining</th><th>Action</th></tr></thead>
+                        <thead id="master-report-head"></thead>
                         <tbody id="report-table-body"></tbody>
                     </table>
                 </div>
@@ -132,10 +133,18 @@
                     </table>
                 </div>
             </div>
+            <div id="production-log" class="page-content">
+                <div class="header"><h1>Production Entries Log</h1></div>
+                <div class="card">
+                    <table class="styled-table">
+                        <thead><tr><th>Date</th><th>Model</th><th>Qty</th><th>Status</th><th>Produced By</th><th>Action</th></tr></thead>
+                        <tbody id="production-log-body"></tbody>
+                    </table>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Modals -->
     <div id="userModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('userModal')">&times;</span>
@@ -148,17 +157,19 @@
                 <hr>
                 <h4>Permissions</h4>
                 <div class="permission-grid">
-                    <div class="permission-item"><input type="checkbox" id="perm-viewDashboard"><label for="perm-viewDashboard">View Dashboard</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-canEnterProduction"><label for="perm-canEnterProduction">Production Entry</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-canEnterProductionFail"><label for="perm-canEnterProductionFail">Production Fail</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-canEnterPackingFail"><label for="perm-canEnterPackingFail">Packing Fail</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-canSendToPacking"><label for="perm-canSendToPacking">Send to Packing</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-canReturnFromPacking"><label for="perm-canReturnFromPacking">Packing Return</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-viewMasterReport"><label for="perm-viewMasterReport">View Master Report</label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-viewPackingReport"><label for="perm-viewPackingReport">View Packing Report</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-viewDashboard"><label>View Dashboard</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canEnterProduction"><label>Production Entry</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canReceiveProduction"><label><b>Receive Production</b></label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canEnterProductionFail"><label>Production Fail</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canSendToPacking"><label>Send to Packing</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canReceiveForPacking"><label><b>Receive for Packing</b></label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canEnterPackingFail"><label>Packing Fail</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-canReturnFromPacking"><label>Packing Return</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-viewMasterReport"><label>View Master Report</label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-viewPackingReport"><label>View Packing Report</label></div>
                     <hr style="grid-column: 1 / -1;">
-                    <div class="permission-item"><input type="checkbox" id="perm-manageBOM"><label for="perm-manageBOM"><b>Manage BOM (Admin)</b></label></div>
-                    <div class="permission-item"><input type="checkbox" id="perm-manageUsers"><label for="perm-manageUsers"><b>Manage Users (Admin)</b></label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-manageBOM"><label><b>Manage BOM (Admin)</b></label></div>
+                    <div class="permission-item"><input type="checkbox" id="perm-manageUsers"><label><b>Manage Users (Admin)</b></label></div>
                 </div>
                 <br>
                 <button type="submit" class="btn">Save User</button>
@@ -173,14 +184,16 @@
             <form id="editMaterialForm" onsubmit="updateMaterial(event)">
                 <input type="hidden" id="edit-material-id">
                 <div class="form-grid">
-                    <div class="form-group"><label for="edit-model-name">Model Name</label><input type="text" id="edit-model-name" required></div>
-                    <div class="form-group"><label for="edit-batch-no">Batch Number</label><input type="text" id="edit-batch-no" required></div>
-                    <div class="form-group"><label for="edit-color">Color</label><input type="text" id="edit-color" required></div>
-                    <div class="form-group"><label for="edit-target-qty">Target Quantity</label><input type="number" id="edit-target-qty" min="0" required></div>
-                    <div class="form-group"><label for="edit-in-hand-qty">In-Hand Quantity</label><input type="number" id="edit-in-hand-qty" min="0" required></div>
-                    <div class="form-group"><label for="edit-packing-sent-qty">Sent to Packing Qty</label><input type="number" id="edit-packing-sent-qty" min="0" required></div>
-                    <div class="form-group"><label for="edit-fail-qty">Production Fail Qty</label><input type="number" id="edit-fail-qty" min="0" required></div>
-                    <div class="form-group"><label for="edit-faulty-qty">Packing Fail Qty</label><input type="number" id="edit-faulty-qty" min="0" required></div>
+                    <div class="form-group"><label>Model Name</label><input type="text" id="edit-model-name" required></div>
+                    <div class="form-group"><label>Batch Number</label><input type="text" id="edit-batch-no" required></div>
+                    <div class="form-group"><label>Color</label><input type="text" id="edit-color" required></div>
+                    <div class="form-group"><label>Target Qty</label><input type="number" id="edit-target-qty" min="0" required></div>
+                    <div class="form-group"><label>Pending Reception Qty</label><input type="number" id="edit-pending-reception-qty" min="0" required></div>
+                    <div class="form-group"><label>In-Hand (Warehouse) Qty</label><input type="number" id="edit-in-hand-qty" min="0" required></div>
+                    <div class="form-group"><label>Pending Packing Qty</label><input type="number" id="edit-pending-packing-qty" min="0" required></div>
+                    <div class="form-group"><label>Packing Stock Qty</label><input type="number" id="edit-packing-stock-qty" min="0" required></div>
+                    <div class="form-group"><label>Production Fail Qty</label><input type="number" id="edit-fail-qty" min="0" required></div>
+                    <div class="form-group"><label>Packing Fail Qty</label><input type="number" id="edit-faulty-qty" min="0" required></div>
                 </div>
                 <button type="submit" class="btn">Update Data</button>
             </form>
@@ -209,7 +222,11 @@
         const db = mainApp.firestore();
         const secondaryApp = firebase.initializeApp(firebaseConfig, 'userCreationApp');
         
-        const allPermissionKeys = ['viewDashboard', 'canEnterProduction', 'canEnterProductionFail', 'canEnterPackingFail', 'canSendToPacking', 'canReturnFromPacking', 'viewMasterReport', 'viewPackingReport', 'manageBOM', 'manageUsers'];
+        const allPermissionKeys = [
+            'viewDashboard', 'canEnterProduction', 'canReceiveProduction', 'canEnterProductionFail', 
+            'canSendToPacking', 'canReceiveForPacking', 'canEnterPackingFail', 'canReturnFromPacking', 
+            'viewMasterReport', 'viewPackingReport', 'manageBOM', 'manageUsers'
+        ];
         let allMaterialsData = [], allPackingSendData = [];
 
         auth.onAuthStateChanged(user => {
@@ -256,6 +273,7 @@
             if (pageId === 'user-management') fetchUsers();
             if (pageId === 'master-report') fetchAllMaterialsAndRenderReport();
             if (pageId === 'packing-send-report') fetchPackingSendReport();
+            if (pageId === 'production-log') fetchProductionLog();
         }
         
         async function fetchUsers() {
@@ -276,7 +294,7 @@
             if (isEdit) {
                 document.getElementById('user-modal-title').textContent = 'Edit User Permissions';
                 document.getElementById('password-group').style.display = 'none';
-                passwordInput.required = false; // Password not required for editing
+                passwordInput.required = false;
                 document.getElementById('user-email').readOnly = true;
                 document.getElementById('user-id').value = docId;
                 db.collection('users').doc(docId).get().then(doc => {
@@ -292,7 +310,7 @@
             } else {
                 document.getElementById('user-modal-title').textContent = 'Add New User';
                 document.getElementById('password-group').style.display = 'block';
-                passwordInput.required = true; // Password is required for new user
+                passwordInput.required = true;
                 document.getElementById('user-email').readOnly = false;
                 document.getElementById('user-id').value = '';
             }
@@ -326,11 +344,17 @@
             } catch (error) { errorDiv.textContent = error.message; }
         }
 
-        async function deleteUser(docId) { if (confirm(`Are you sure you want to delete this user?`)) { await db.collection('users').doc(docId).delete(); fetchUsers(); }}
+        async function deleteUser(docId) { if (confirm(`Are you sure you want to delete this user? This action cannot be undone.`)) { await db.collection('users').doc(docId).delete(); alert('User data deleted from Firestore.'); fetchUsers(); }}
         
         async function saveBOM(event) {
             event.preventDefault();
-            const bomData = { modelName: document.getElementById('model-name').value, batchNo: document.getElementById('batch-no').value, materialName: document.getElementById('material-name').value, color: document.getElementById('color').value, importQty: Number(document.getElementById('import-qty').value), targetQty: Number(document.getElementById('target-qty').value), inHandQty: 0, packingSentQty: 0, faultyQty: 0, failQty: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+            const bomData = { 
+                modelName: document.getElementById('model-name').value, batchNo: document.getElementById('batch-no').value, 
+                materialName: document.getElementById('material-name').value, color: document.getElementById('color').value, 
+                importQty: Number(document.getElementById('import-qty').value), targetQty: Number(document.getElementById('target-qty').value), 
+                pendingReceptionQty: 0, inHandQty: 0, pendingPackingQty: 0, packingStockQty: 0, 
+                faultyQty: 0, failQty: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+            };
             try {
                 await db.collection('materials').add(bomData);
                 alert('BOM saved successfully!');
@@ -340,7 +364,7 @@
         
         async function fetchAllMaterialsAndRenderReport() {
             const reportTableBody = document.getElementById('report-table-body');
-            reportTableBody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
+            reportTableBody.innerHTML = `<tr><td colspan="11">Loading...</td></tr>`;
             try {
                 const snapshot = await db.collection('materials').orderBy('createdAt', 'desc').get();
                 allMaterialsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -349,14 +373,21 @@
         }
 
         function renderMasterReport(data) {
-            const reportTableBody = document.getElementById('report-table-body');
+            document.getElementById('master-report-head').innerHTML = `<tr><th>Model</th><th>Batch</th><th>Color</th><th>Target</th><th>Pending Reception</th><th>In Warehouse</th><th>Pending Packing</th><th>Packing Stock</th><th>Total Fail</th><th>Remaining</th><th>Action</th></tr>`;
             let tableHtml = '';
-            if (data.length === 0) { reportTableBody.innerHTML = `<tr><td colspan="9">No data found.</td></tr>`; return; }
+            if (data.length === 0) { document.getElementById('report-table-body').innerHTML = `<tr><td colspan="11">No data found.</td></tr>`; return; }
             data.forEach(item => {
-                const target = item.targetQty || 0, inHand = item.inHandQty || 0, packingSent = item.packingSentQty || 0, totalFail = (item.faultyQty || 0) + (item.failQty || 0), achievement = inHand + packingSent, remaining = target - achievement;
-                tableHtml += `<tr><td>${item.modelName}</td><td>${item.batchNo || 'N/A'}</td><td>${item.color}</td><td>${target}</td><td>${inHand}</td><td>${packingSent}</td><td>${totalFail}</td><td>${remaining > 0 ? remaining : 0}</td><td class="action-buttons"><button class="btn btn-sm btn-warning" onclick="openEditMaterialModal('${item.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteMaterialEntry('${item.id}', '${item.modelName} - ${item.batchNo}')">Delete</button></td></tr>`;
+                const target = item.targetQty || 0,
+                      pendingRec = item.pendingReceptionQty || 0,
+                      inHand = item.inHandQty || 0,
+                      pendingPack = item.pendingPackingQty || 0,
+                      packStock = item.packingStockQty || 0,
+                      totalFail = (item.faultyQty || 0) + (item.failQty || 0),
+                      achievement = inHand + pendingPack + packStock,
+                      remaining = target - achievement;
+                tableHtml += `<tr><td>${item.modelName}</td><td>${item.batchNo || 'N/A'}</td><td>${item.color}</td><td>${target}</td><td>${pendingRec}</td><td>${inHand}</td><td>${pendingPack}</td><td>${packStock}</td><td>${totalFail}</td><td>${remaining > 0 ? remaining : 0}</td><td class="action-buttons"><button class="btn btn-sm btn-warning" onclick="openEditMaterialModal('${item.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteMaterialEntry('${item.id}', '${item.modelName}')">Delete</button></td></tr>`;
             });
-            reportTableBody.innerHTML = tableHtml;
+            document.getElementById('report-table-body').innerHTML = tableHtml;
         }
         
         async function deleteMaterialEntry(docId, modelInfo) { if (confirm(`Are you sure you want to permanently delete "${modelInfo}"?`)) { db.collection('materials').doc(docId).delete().then(() => { alert('Entry deleted successfully!'); fetchAllMaterialsAndRenderReport(); }).catch((error) => alert('Error deleting entry: ' + error)); } }
@@ -364,7 +395,17 @@
         function openEditMaterialModal(docId) {
             const material = allMaterialsData.find(m => m.id === docId);
             if (material) {
-                document.getElementById('edit-material-id').value = docId; document.getElementById('edit-model-name').value = material.modelName; document.getElementById('edit-batch-no').value = material.batchNo; document.getElementById('edit-color').value = material.color; document.getElementById('edit-target-qty').value = material.targetQty || 0; document.getElementById('edit-in-hand-qty').value = material.inHandQty || 0; document.getElementById('edit-packing-sent-qty').value = material.packingSentQty || 0; document.getElementById('edit-fail-qty').value = material.failQty || 0; document.getElementById('edit-faulty-qty').value = material.faultyQty || 0;
+                document.getElementById('edit-material-id').value = docId;
+                document.getElementById('edit-model-name').value = material.modelName;
+                document.getElementById('edit-batch-no').value = material.batchNo;
+                document.getElementById('edit-color').value = material.color;
+                document.getElementById('edit-target-qty').value = material.targetQty || 0;
+                document.getElementById('edit-pending-reception-qty').value = material.pendingReceptionQty || 0;
+                document.getElementById('edit-in-hand-qty').value = material.inHandQty || 0;
+                document.getElementById('edit-pending-packing-qty').value = material.pendingPackingQty || 0;
+                document.getElementById('edit-packing-stock-qty').value = material.packingStockQty || 0;
+                document.getElementById('edit-fail-qty').value = material.failQty || 0;
+                document.getElementById('edit-faulty-qty').value = material.faultyQty || 0;
                 document.getElementById('editMaterialModal').style.display = 'block';
             }
         }
@@ -372,7 +413,13 @@
         async function updateMaterial(event) {
             event.preventDefault();
             const docId = document.getElementById('edit-material-id').value;
-            const updatedData = { modelName: document.getElementById('edit-model-name').value, batchNo: document.getElementById('edit-batch-no').value, color: document.getElementById('edit-color').value, targetQty: Number(document.getElementById('edit-target-qty').value), inHandQty: Number(document.getElementById('edit-in-hand-qty').value), packingSentQty: Number(document.getElementById('edit-packing-sent-qty').value), failQty: Number(document.getElementById('edit-fail-qty').value), faultyQty: Number(document.getElementById('edit-faulty-qty').value), };
+            const updatedData = {
+                modelName: document.getElementById('edit-model-name').value, batchNo: document.getElementById('edit-batch-no').value,
+                color: document.getElementById('edit-color').value, targetQty: Number(document.getElementById('edit-target-qty').value),
+                pendingReceptionQty: Number(document.getElementById('edit-pending-reception-qty').value), inHandQty: Number(document.getElementById('edit-in-hand-qty').value),
+                pendingPackingQty: Number(document.getElementById('edit-pending-packing-qty').value), packingStockQty: Number(document.getElementById('edit-packing-stock-qty').value),
+                failQty: Number(document.getElementById('edit-fail-qty').value), faultyQty: Number(document.getElementById('edit-faulty-qty').value),
+            };
             try {
                 await db.collection('materials').doc(docId).update(updatedData);
                 alert('Product data updated successfully!'); closeModal('editMaterialModal'); fetchAllMaterialsAndRenderReport(); loadDashboardData();
@@ -425,7 +472,9 @@
                 let totalTargetQty = 0, totalProduction = 0, totalFail = 0;
                 materialsSnapshot.forEach(doc => {
                     const data = doc.data();
-                    totalTargetQty += (data.targetQty || 0); totalProduction += (data.inHandQty || 0) + (data.packingSentQty || 0); totalFail += (data.faultyQty || 0) + (data.failQty || 0);
+                    totalTargetQty += (data.targetQty || 0); 
+                    totalProduction += (data.inHandQty || 0) + (data.pendingPackingQty || 0) + (data.packingStockQty || 0); 
+                    totalFail += (data.faultyQty || 0) + (data.failQty || 0);
                 });
                 document.getElementById('total-users').textContent = usersSnapshot.size; document.getElementById('total-target-qty').textContent = totalTargetQty; document.getElementById('total-production').textContent = totalProduction; document.getElementById('total-fail').textContent = totalFail;
             } catch (error) { console.error("Error loading dashboard data:", error); }
@@ -443,6 +492,42 @@
             if(addUserBtn) addUserBtn.onclick = () => {
                 openUserModal(false);
             };
+        }
+
+        async function fetchProductionLog() {
+            const tbody = document.getElementById('production-log-body');
+            tbody.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
+            try {
+                const snapshot = await db.collection('production_entries').orderBy('producedAt', 'desc').limit(50).get();
+                let html = '';
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    const date = item.producedAt ? item.producedAt.toDate().toLocaleString() : 'N/A';
+                    html += `<tr>
+                        <td>${date}</td>
+                        <td>${item.modelName} - ${item.color}</td>
+                        <td>${item.quantity}</td>
+                        <td><span style="color: ${item.status === 'pending' ? 'orange' : 'green'}; text-transform: capitalize;">${item.status}</span></td>
+                        <td>${item.producedBy}</td>
+                        <td><button class="btn-sm btn-danger" onclick="deleteProductionEntry('${doc.id}')">Delete</button></td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6">No entries found.</td></tr>`;
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="6">Error loading data.</td></tr>`;
+            }
+        }
+        
+        async function deleteProductionEntry(docId) {
+             if (confirm("Are you sure? This will not adjust stock quantities. This is for correcting logging errors.")) {
+                 try {
+                     await db.collection('production_entries').doc(docId).delete();
+                     alert("Entry deleted.");
+                     fetchProductionLog();
+                 } catch (error) {
+                     alert("Failed to delete: " + error.message);
+                 }
+             }
         }
     </script>
 </body>
