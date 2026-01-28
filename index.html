@@ -32,6 +32,8 @@
         .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         .btn { background-color: var(--primary-color); color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background-color: 0.2s; }
         .btn:hover { background-color: var(--secondary-color); }
+        .btn.secondary { background: #7f8c8d; }
+        .btn.secondary:hover { background: #95a5a6; }
         .btn-sm { padding: 6px 12px; font-size: 0.9rem; }
         .btn-warning { background-color: var(--warning-color); }
         .btn-warning:hover { background-color: var(--warning-hover); }
@@ -81,7 +83,6 @@
             </ul>
         </nav>
         <main class="main-content">
-            <!-- All page content divs are here, no changes needed -->
             <div id="dashboard" class="page-content">
                 <div class="header"><h1>Dashboard</h1></div>
                 <div class="stat-cards">
@@ -138,6 +139,7 @@
                     </table>
                 </div>
             </div>
+
             <div id="packing-send-report" class="page-content">
                 <div class="header"><h1>Packing Send Report</h1></div>
                 <div class="card">
@@ -159,7 +161,7 @@
         </main>
     </div>
 
-    <!-- All modals are here, no changes needed -->
+    <!-- Modals -->
     <div id="addUserModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('addUserModal')">&times;</span>
@@ -173,20 +175,28 @@
             </form>
         </div>
     </div>
+    
     <div id="editMaterialModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('editMaterialModal')">&times;</span>
-            <h2>Edit Product</h2>
+            <h2>Edit Product Data</h2>
             <form id="editMaterialForm" onsubmit="updateMaterial(event)">
                 <input type="hidden" id="edit-material-id">
-                <div class="form-group"><label for="edit-model-name">Model Name</label><input type="text" id="edit-model-name" required></div>
-                <div class="form-group"><label for="edit-batch-no">Batch Number</label><input type="text" id="edit-batch-no" required></div>
-                <div class="form-group"><label for="edit-color">Color</label><input type="text" id="edit-color" required></div>
-                <div class="form-group"><label for="edit-target-qty">Target Quantity</label><input type="number" id="edit-target-qty" min="1" required></div>
-                <button type="submit" class="btn">Update</button>
+                <div class="form-grid">
+                    <div class="form-group"><label for="edit-model-name">Model Name</label><input type="text" id="edit-model-name" required></div>
+                    <div class="form-group"><label for="edit-batch-no">Batch Number</label><input type="text" id="edit-batch-no" required></div>
+                    <div class="form-group"><label for="edit-color">Color</label><input type="text" id="edit-color" required></div>
+                    <div class="form-group"><label for="edit-target-qty">Target Quantity</label><input type="number" id="edit-target-qty" min="0" required></div>
+                    <div class="form-group"><label for="edit-in-hand-qty">In-Hand Quantity</label><input type="number" id="edit-in-hand-qty" min="0" required></div>
+                    <div class="form-group"><label for="edit-packing-sent-qty">Sent to Packing Qty</label><input type="number" id="edit-packing-sent-qty" min="0" required></div>
+                    <div class="form-group"><label for="edit-fail-qty">Production Fail Qty</label><input type="number" id="edit-fail-qty" min="0" required></div>
+                    <div class="form-group"><label for="edit-faulty-qty">Packing Fail Qty</label><input type="number" id="edit-faulty-qty" min="0" required></div>
+                </div>
+                <button type="submit" class="btn">Update Data</button>
             </form>
         </div>
     </div>
+
     <div id="editPackingSendModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('editPackingSendModal')">&times;</span>
@@ -198,6 +208,7 @@
             </form>
         </div>
     </div>
+
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -246,29 +257,46 @@
         });
 
         // ===================================================================
-        // ===== START: DIAGNOSTIC (TESTING) FUNCTION ========================
+        // ===== START: DEBUGGING FUNCTION ===================================
         // ===================================================================
-        // This function BYPASSES the role check. If you can log in with this,
-        // it means your Authentication is correct, but the problem is in your
-        // Firestore 'users' collection (role data is wrong or missing).
+        // This function will print messages to the browser console to help find the error.
         async function checkUserRoleAndShowPanel(uid) {
-            try {
-                console.log("DIAGNOSTIC MODE: Role check is bypassed. Attempting to show panel for UID:", uid);
+             try {
+                console.log("Step 1: Checking role for user with UID:", uid);
                 
-                // Directly show the admin panel without checking for role
-                document.getElementById('login-page').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'flex';
-                initializeModalListeners();
-                showPage('dashboard', document.querySelector('.sidebar-menu a'));
+                const userDoc = await db.collection('users').doc(uid).get();
 
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    console.log("Step 2: User document found in Firestore.");
+                    console.log("Step 3: User Data:", userData);
+                    console.log("Step 4: ROLE FOUND is:", userData.role);
+
+                    if (userData.role === 'admin') {
+                        console.log("Step 5: SUCCESS! Role is 'admin'. Granting access.");
+                        
+                        document.getElementById('login-page').style.display = 'none';
+                        document.getElementById('admin-panel').style.display = 'flex';
+                        initializeModalListeners();
+                        showPage('dashboard', document.querySelector('.sidebar-menu a'));
+                    } else {
+                        console.error("Step 5: FAILED! Role is NOT 'admin'. Role found:", userData.role);
+                        alert("Permission Denied. Your role is: " + (userData.role || "Not Assigned"));
+                        logoutUser();
+                    }
+                } else {
+                    console.error("Step 2: FAILED! No user document found in Firestore for this UID.");
+                    alert("You do not have a user profile in the database. Please contact support.");
+                    logoutUser();
+                }
             } catch (error) {
-                console.error("A critical error occurred:", error);
-                alert("A critical error occurred during login. Check the console for details.");
+                console.error("CRITICAL ERROR while checking user role:", error);
+                alert("An error occurred while checking permissions. Check the browser console (F12) for details.");
                 logoutUser();
             }
         }
         // ===================================================================
-        // ===== END: DIAGNOSTIC (TESTING) FUNCTION ==========================
+        // ===== END: DEBUGGING FUNCTION =====================================
         // ===================================================================
         
         function loginUser(event) {
@@ -299,8 +327,6 @@
             
             try {
                 const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, password);
-                // IMPORTANT: This creates the user with their role in Firestore.
-                // This step is crucial for the original (non-diagnostic) code to work.
                 await db.collection('users').doc(userCredential.user.uid).set({ email, role });
                 await secondaryApp.auth().signOut();
                 alert('User created successfully!');
@@ -311,8 +337,7 @@
                 await secondaryApp.auth().signOut();
             }
         }
-        
-        // All other Javascript functions remain the same...
+
         async function fetchUsers() {
             try {
                 const snapshot = await db.collection('users').get();
@@ -326,6 +351,7 @@
                 console.error("Error fetching users:", error);
             }
         }
+
         async function deleteUser(docId, email) {
             if (confirm(`Are you sure you want to delete the user "${email}"?`)) {
                 db.collection('users').doc(docId).delete().then(() => {
@@ -334,6 +360,7 @@
                 });
             }
         }
+        
         async function saveBOM(event) {
             event.preventDefault();
             const bomData = {
@@ -357,6 +384,7 @@
                 alert('An error occurred: ' + error.message);
             }
         }
+        
         async function fetchAllMaterialsAndRenderReport() {
             const reportTableBody = document.getElementById('report-table-body');
             reportTableBody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
@@ -368,6 +396,7 @@
                 console.error("Error loading master report:", error);
             }
         }
+
         function renderMasterReport(data) {
             const reportTableBody = document.getElementById('report-table-body');
             let tableHtml = '';
@@ -401,6 +430,7 @@
             });
             reportTableBody.innerHTML = tableHtml;
         }
+        
         async function deleteMaterialEntry(docId, modelInfo) {
             if (confirm(`Are you sure you want to permanently delete "${modelInfo}"?`)) {
                 db.collection('materials').doc(docId).delete()
@@ -411,6 +441,7 @@
                     .catch((error) => alert('Error deleting entry: ' + error));
             }
         }
+
         function openEditMaterialModal(docId) {
             const material = allMaterialsData.find(m => m.id === docId);
             if (material) {
@@ -418,10 +449,15 @@
                 document.getElementById('edit-model-name').value = material.modelName;
                 document.getElementById('edit-batch-no').value = material.batchNo;
                 document.getElementById('edit-color').value = material.color;
-                document.getElementById('edit-target-qty').value = material.targetQty;
+                document.getElementById('edit-target-qty').value = material.targetQty || 0;
+                document.getElementById('edit-in-hand-qty').value = material.inHandQty || 0;
+                document.getElementById('edit-packing-sent-qty').value = material.packingSentQty || 0;
+                document.getElementById('edit-fail-qty').value = material.failQty || 0;
+                document.getElementById('edit-faulty-qty').value = material.faultyQty || 0;
                 document.getElementById('editMaterialModal').style.display = 'block';
             }
         }
+        
         async function updateMaterial(event) {
             event.preventDefault();
             const docId = document.getElementById('edit-material-id').value;
@@ -429,11 +465,15 @@
                 modelName: document.getElementById('edit-model-name').value,
                 batchNo: document.getElementById('edit-batch-no').value,
                 color: document.getElementById('edit-color').value,
-                targetQty: Number(document.getElementById('edit-target-qty').value)
+                targetQty: Number(document.getElementById('edit-target-qty').value),
+                inHandQty: Number(document.getElementById('edit-in-hand-qty').value),
+                packingSentQty: Number(document.getElementById('edit-packing-sent-qty').value),
+                failQty: Number(document.getElementById('edit-fail-qty').value),
+                faultyQty: Number(document.getElementById('edit-faulty-qty').value),
             };
             try {
                 await db.collection('materials').doc(docId).update(updatedData);
-                alert('Product updated successfully!');
+                alert('Product data updated successfully!');
                 closeModal('editMaterialModal');
                 fetchAllMaterialsAndRenderReport();
                 loadDashboardData();
@@ -441,6 +481,7 @@
                 alert('Failed to update: ' + error.message);
             }
         }
+        
         async function fetchPackingSendReport() {
             const reportTableBody = document.getElementById('packing-report-table-body');
             reportTableBody.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
@@ -453,6 +494,7 @@
                 reportTableBody.innerHTML = `<tr><td colspan="6">Failed to load data.</td></tr>`;
             }
         }
+        
         function renderPackingSendReport(data) {
             const reportTableBody = document.getElementById('packing-report-table-body');
             let tableHtml = '';
@@ -478,6 +520,7 @@
             });
             reportTableBody.innerHTML = tableHtml;
         }
+
         function openEditPackingSendModal(docId) {
             const entry = allPackingSendData.find(p => p.id === docId);
             if (entry) {
@@ -486,6 +529,7 @@
                 document.getElementById('editPackingSendModal').style.display = 'block';
             }
         }
+
         async function updatePackingSendEntry(event) {
             event.preventDefault();
             const docId = document.getElementById('edit-packing-send-id').value;
@@ -499,6 +543,7 @@
                 alert('Failed to update entry: ' + error.message);
             }
         }
+        
         async function deletePackingSendEntry(docId) {
             if (confirm("Are you sure you want to permanently delete this entry?")) {
                 try {
@@ -510,19 +555,24 @@
                 }
             }
         }
+
         async function loadDashboardData() {
             try {
                 const usersPromise = db.collection('users').get();
                 const materialsPromise = db.collection('materials').get();
+                
                 const [usersSnapshot, materialsSnapshot] = await Promise.all([usersPromise, materialsPromise]);
+                
                 let totalTargetQty = 0;
                 let totalProduction = 0, totalFail = 0;
+                
                 materialsSnapshot.forEach(doc => {
                     const data = doc.data();
                     totalTargetQty += (data.targetQty || 0);
                     totalProduction += (data.inHandQty || 0) + (data.packingSentQty || 0);
                     totalFail += (data.faultyQty || 0) + (data.failQty || 0);
                 });
+                
                 document.getElementById('total-users').textContent = usersSnapshot.size;
                 document.getElementById('total-target-qty').textContent = totalTargetQty;
                 document.getElementById('total-production').textContent = totalProduction;
@@ -531,9 +581,11 @@
                 console.error("Error loading dashboard data:", error);
             }
         }
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
+        
         function initializeModalListeners() {
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
